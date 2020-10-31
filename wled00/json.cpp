@@ -239,6 +239,7 @@ bool deserializeState(JsonObject root)
   usermods.readFromJsonState(root);
 
   colorUpdated(noNotification ? NOTIFIER_CALL_MODE_NO_NOTIFY : NOTIFIER_CALL_MODE_DIRECT_CHANGE);
+  instantSave();
 
   //write presets to flash directly?
   bool persistSaves = !(root[F("np")] | false);

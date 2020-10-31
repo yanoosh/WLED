@@ -753,3 +753,109 @@ void saveMacro(byte index, const String& mc, bool persist) //only commit on sing
   }
   if (persist) commit();
 }
+
+void instantLoad() {
+  byte version = 0;
+  byte i;
+  uint16_t memoryPosition;
+
+  byte oldPartitionSize = EEPROM.read(INSTANT_MEMORY_BEGIN);
+  EEPROM.write(INSTANT_MEMORY_BEGIN, INSTANT_PARTITION_SIZE);
+  if (oldPartitionSize != 0 && oldPartitionSize != 255) {
+    byte oldPartitions = ((INSTANT_MEMORY_SIZE - 1) / oldPartitionSize);
+    for (byte i = 0; i < oldPartitions; i++) {
+      version = EEPROM.read(INSTANT_PARTITION_BEGIN + oldPartitionSize * i);
+      if (version > instantVersion) {
+        instantVersion = version;
+        instantPartition = i;
+      }
+    }
+
+    // load from memory to variable
+    byte partitionSize = min(oldPartitionSize, INSTANT_PARTITION_SIZE);
+    memoryPosition = INSTANT_PARTITION_BEGIN + oldPartitionSize * instantPartition;
+    for (i = 0; i < partitionSize; i++) {
+      instantSettings[i] = EEPROM.read(memoryPosition + i);
+    }
+
+    // copy settings
+    bri = instantSettings[1];
+    briLast = instantSettings[2];
+
+    for (byte i = 0; i < 4; i++) {
+      col[i] = instantSettings[i + 3];
+      colSec[i] = instantSettings[i + 7];
+    }
+    strip.setColor(2, instantSettings[11], instantSettings[12], instantSettings[13], instantSettings[14]);
+
+    effectCurrent = instantSettings[15];
+    effectSpeed = instantSettings[16];
+    effectIntensity = instantSettings[17];
+    effectPalette = instantSettings[18];
+
+    if (oldPartitionSize != INSTANT_PARTITION_SIZE) {
+      // rewrite memory when partition size change
+      instantPartition = 255;
+      memset(instantSettings, 0, INSTANT_PARTITION_SIZE);
+      instantSave();
+    }
+  }
+}
+
+void instantSave() {
+  byte i;
+  uint16_t memoryPosition;
+
+  // update instant settings
+  instantSettingsDirt = false;
+  // copy settings
+  instantSettingsUpdate(1, bri);
+  instantSettingsUpdate(2, briLast);
+
+  for (i = 0; i < 4; i++) {
+    instantSettingsUpdate(i + 3, col[i]);     // 3-6
+    instantSettingsUpdate(i + 7, colSec[i]);  // 7-10
+  }
+
+  uint32_t colTer = strip.getSegment(strip.getMainSegmentId()).colors[2];
+  instantSettingsUpdate(11, (colTer >> 16) & 0xFF);
+  instantSettingsUpdate(12, (colTer >> 8) & 0xFF);
+  instantSettingsUpdate(13, (colTer >> 0) & 0xFF);
+  instantSettingsUpdate(14, (colTer >> 24) & 0xFF);
+
+  instantSettingsUpdate(15, effectCurrent);
+  instantSettingsUpdate(16, effectSpeed);
+  instantSettingsUpdate(17, effectIntensity);
+  instantSettingsUpdate(18, effectPalette);
+
+  // update partition, version and save to memory
+  if (instantSettingsDirt) {
+    instantVersion++;
+    if (instantVersion == 0) {
+      for (memoryPosition = INSTANT_PARTITION_BEGIN; memoryPosition < (INSTANT_MEMORY_BEGIN + INSTANT_MEMORY_SIZE); memoryPosition++) {
+        EEPROM.write(memoryPosition, 0);
+      }
+      instantVersion++;
+    }
+    instantPartition++;
+    if (instantPartition >= INSTANT_PARTITIONS) {
+      instantPartition = 0;
+    }
+
+    // save settings to memory
+    instantSettings[0] = instantVersion;
+    memoryPosition = INSTANT_PARTITION_BEGIN + INSTANT_PARTITION_SIZE * instantPartition;
+    for (i = 0; i < INSTANT_PARTITION_SIZE; i++) {
+      EEPROM.write(memoryPosition + i, instantSettings[i]);
+    }
+
+    EEPROM.commit();
+  }
+}
+
+void instantSettingsUpdate(byte i, byte value) {
+  if (value != instantSettings[i]) {
+    instantSettings[i] = value;
+    instantSettingsDirt = true;
+  }
+}

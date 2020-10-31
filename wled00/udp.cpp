@@ -220,6 +220,7 @@ void handleNotifications()
     
     if (receiveNotificationBrightness || !someSel) bri = udpIn[2];
     colorUpdated(NOTIFIER_CALL_MODE_NOTIFICATION);
+    instantSave();
     return;
   }
   if (!receiveDirect) return;

@@ -13,7 +13,10 @@ void _setRandomColor(bool _sec,bool fromButton)
   } else {
     colorHStoRGB(lastRandomIndex*256,255,col);
   }
-  if (fromButton) colorUpdated(2);
+  if (fromButton) {
+    colorUpdated(2);
+    instantSave();
+  }
 }
 
 
@@ -752,6 +755,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req)
 
   pos = req.indexOf(F("&NN")); //do not send UDP notifications this time
   colorUpdated((pos > 0) ? NOTIFIER_CALL_MODE_NO_NOTIFY : NOTIFIER_CALL_MODE_DIRECT_CHANGE);
-
+  instantSave();
+  
   return true;
 }

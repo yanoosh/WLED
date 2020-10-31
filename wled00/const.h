@@ -112,7 +112,7 @@
 #define NL_MODE_SUN               3            //Sunrise/sunset. Target brightness is set immediately, then Sunrise effect is started. Max 60 min.
 
 //EEPROM size
-#define EEPSIZE 2560  //Maximum is 4096
+#define EEPSIZE 4096  //Maximum is 4096
 
 #define NTP_PACKET_SIZE 48
 
@@ -135,5 +135,12 @@
 #else
   #define JSON_BUFFER_SIZE 16384
 #endif
+
+// Instant save
+#define INSTANT_MEMORY_BEGIN 3072
+#define INSTANT_PARTITION_BEGIN (INSTANT_MEMORY_BEGIN + 1)
+#define INSTANT_MEMORY_SIZE 1024
+#define INSTANT_PARTITION_SIZE (byte)20
+#define INSTANT_PARTITIONS (byte)((INSTANT_MEMORY_SIZE - 1) / INSTANT_PARTITION_SIZE)
 
 #endif

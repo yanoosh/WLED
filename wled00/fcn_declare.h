@@ -201,6 +201,9 @@ void savePreset(byte index, bool persist = true);
 void loadMacro(byte index, char* m);
 void applyMacro(byte index);
 void saveMacro(byte index, const String& mc, bool persist = true); //only commit on single save, not in settings
+void instantLoad();
+void instantSave();
+void instantSettingsUpdate(byte i, byte value);
 
 //wled_serial.cpp
 void handleSerial();

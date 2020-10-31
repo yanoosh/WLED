@@ -443,6 +443,12 @@ WLED_GLOBAL long lastInterfaceUpdate _INIT(0);
 WLED_GLOBAL byte interfaceUpdateCallMode _INIT(NOTIFIER_CALL_MODE_INIT);
 WLED_GLOBAL char mqttStatusTopic[40] _INIT("");        // this must be global because of async handlers
 
+// instant save
+WLED_GLOBAL byte instantSettings[INSTANT_PARTITION_SIZE];
+WLED_GLOBAL byte instantVersion _INIT(0);
+WLED_GLOBAL byte instantPartition _INIT(0);
+WLED_GLOBAL boolean instantSettingsDirt _INIT(false);
+
 #if AUXPIN >= 0
   // auxiliary debug pin
   WLED_GLOBAL byte auxTime _INIT(0);

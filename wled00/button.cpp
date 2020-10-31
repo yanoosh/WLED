@@ -10,6 +10,7 @@ void shortPressAction()
   {
     toggleOnOff();
     colorUpdated(NOTIFIER_CALL_MODE_BUTTON);
+    instantSave();
   } else {
     applyMacro(macroButton);
   }

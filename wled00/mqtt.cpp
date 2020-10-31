@@ -9,13 +9,20 @@
 
 void parseMQTTBriPayload(char* payload)
 {
-  if      (strstr(payload, "ON") || strstr(payload, "on") || strstr(payload, "true")) {bri = briLast; colorUpdated(1);}
-  else if (strstr(payload, "T" ) || strstr(payload, "t" )) {toggleOnOff(); colorUpdated(1);}
-  else {
+  if (strstr(payload, "ON") || strstr(payload, "on") || strstr(payload, "true")) {
+    bri = briLast;
+    colorUpdated(NOTIFIER_CALL_MODE_DIRECT_CHANGE);
+    instantSave();
+  } else if (strstr(payload, "T") || strstr(payload, "t")) {
+    toggleOnOff();
+    colorUpdated(NOTIFIER_CALL_MODE_DIRECT_CHANGE);
+    instantSave();
+  } else {
     uint8_t in = strtoul(payload, NULL, 10);
     if (in == 0 && bri > 0) briLast = bri;
     bri = in;
     colorUpdated(NOTIFIER_CALL_MODE_DIRECT_CHANGE);
+    instantSave();
   }
 }
 
@@ -83,6 +90,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   {
     colorFromDecOrHexString(col, (char*)payload);
     colorUpdated(NOTIFIER_CALL_MODE_DIRECT_CHANGE);
+    instantSave();
   } else if (strcmp(topic, "/api") == 0)
   {
     String apireq = "win&";
